@@ -1,5 +1,5 @@
 # go-redis-migrator
-A cluster aware Redis key migrator.  Moves keys from one cluster to another.
+A cluster aware Redis key migrator.  Moves keys from one cluster or host to another cluster or host.
 
 ## Details
 This program connects to a source host or cluster and migrates keys to a destination host or cluster.  It is possible to fetch a list of keys with this program, create a file with the keys to migrate, and feed that list into this program for selective migration.  This is useful if you have some keys hanging around that you do not want to migrate.
