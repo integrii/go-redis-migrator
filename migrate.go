@@ -40,7 +40,7 @@ func main() {
 	var sourceHosts = flag.String("sourceHosts", "", "A list of source cluster host:port servers seperated by commas. EX) 127.0.0.1:6379,127.0.0.1:6380")
 	var destinationHosts = flag.String("destinationHosts", "", "A list of source cluster host:port servers seperated by spaces. EX) 127.0.0.1:6379,127.0.0.1:6380")
 	var getKeys = flag.Bool("getKeys", false, "Fetches and prints keys from the source host.")
-	var copyKeys = flag.Bool("copyKeys", false, "Copies keys in a specified list to the destination cluster from the source cluster.")
+	var copyData = flag.Bool("copyData", false, "Copies all keys in a specified list to the destination cluster from the source cluster.")
 	var keyFilePath = flag.String("keyFile", "", "The file path which contains the list of keys to migrate.")
 
 	// parse the args we are looking for
@@ -54,7 +54,7 @@ func main() {
 	// break source hosts comma list into an array
 	var sourceHostsString = *sourceHosts
 	if len(sourceHostsString) > 0 {
-		log.Println("Source hosts detected: " + sourceHostsString)
+		//log.Println("Source hosts detected: " + sourceHostsString)
 		// break source hosts string at commas into a slice
 		sourceHostsArray = strings.Split(sourceHostsString, ",")
 		connectSourceCluster()
@@ -64,7 +64,7 @@ func main() {
 	// break destination hosts comma list into an array
 	var destinationHostsString = *destinationHosts
 	if len(destinationHostsString) > 0 {
-		log.Println("Destination hosts detected: " + destinationHostsString)
+		//log.Println("Destination hosts detected: " + destinationHostsString)
 		// break source hosts string at commas into a slice
 		destinationHostsArray = strings.Split(destinationHostsString, ",")
 		connectDestinationCluster()
@@ -81,19 +81,19 @@ func main() {
 			log.Fatalln("Please specify a source cluster using -sourceCluster=127.0.0.1:6379.")
 		}
 
-		log.Println("Getting full key list...")
+		//log.Println("Getting full key list...")
 		// iterate through each host in the destination cluster, connect, and
 		// run KEYS *
 		var allKeys = getSourceKeys()
 
-		// loop through all keys
-		for i = 0; len(allKeys); i++ {
+		// loop through all keys and print them plainly one per line
+		for i := 0; i < len(allKeys); i++ {
 			fmt.Println(allKeys[i])
 		}
 	}
 
 	// Copy all or some keys to the new server/cluster
-	if *copyKeys == true {
+	if *copyData == true {
 
 		// ensure we are connected
 		if sourceClusterConnected != true {
@@ -105,6 +105,13 @@ func main() {
 
 		// check if a keyfile was specified
 		var keyFile = *keyFilePath
+
+		// if the key file path was set, open the file and read all the keys
+		// into an array
+
+		// loop through the array of key strings
+		// read key from source cluster
+		// write key to destination cluster
 
 		// load the list of keys from the keyfile
 		log.Println("Destination hosts: " + destinationHostsString + keyFile)
@@ -136,18 +143,18 @@ func connectSourceCluster() {
 			Addr: sourceHostsArray[0],
 		})
 		sourceIsCluster = false
-		log.Println("Source is a single host.")
+		//log.Println("Source is a single host.")
 		hostPingTest(sourceHost)
 	} else {
 		sourceCluster = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: sourceHostsArray,
 		})
 		sourceIsCluster = true
-		log.Println("Source is a cluster.")
+		//log.Println("Source is a cluster.")
 		clusterPingTest(sourceCluster)
 	}
 	sourceClusterConnected = true
-	log.Println("Source connected")
+	//log.Println("Source connected")
 }
 
 // Connects to the destination host/cluster
@@ -159,18 +166,18 @@ func connectDestinationCluster() {
 			Addr: destinationHostsArray[0],
 		})
 		destinationIsCluster = false
-		log.Println("Destination is a single host.")
+		//log.Println("Destination is a single host.")
 		hostPingTest(destinationHost)
 	} else {
 		destinationCluster = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: destinationHostsArray,
 		})
 		destinationIsCluster = true
-		log.Println("Destination is a cluster.")
+		//log.Println("Destination is a cluster.")
 		clusterPingTest(destinationCluster)
 	}
 	destinationClusterConnected = true
-	log.Println("Destination connected.")
+	//log.Println("Destination connected.")
 }
 
 // Gets all the keys from the source server/cluster
