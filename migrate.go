@@ -231,7 +231,7 @@ func connectDestinationCluster() {
 func getSourceKeys() []string {
 
 	var allKeys *redis.StringSliceCmd
-	if destinationIsCluster == true {
+	if sourceIsCluster == true {
 		allKeys = sourceCluster.Keys("*")
 	} else {
 		allKeys = sourceHost.Keys("*")
