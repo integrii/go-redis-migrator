@@ -6,16 +6,24 @@ This program connects to a source host or cluster and migrates keys to a destina
 
 #### Getting a key list from the source cluster
 `./go-redis-migrator -getKeys=true -sourceHosts=127.0.0.1:6379`
-or
+
+With a cluster:
+
 `./go-redis-migrator -getKeys=true -sourceHosts=127.0.0.1:6379,127.0.0.1:6380`
 
 #### Migrating keys 
 `./go-redis-migrator -copydata=true -sourceHosts=127.0.0.1:6379 -destinationHosts=192.168.0.1:6379`
-or with clusters
+
+With clusters:
+
 `./go-redis-migrator -copyData=true -sourceHosts=127.0.0.1:6379,127.0.0.1:6380 -destinationHosts=192.168.0.1:6379,192.168.0.1:6380`
-or from a cluster and to a single host
+
+or from a cluster and to a single host:
+
 `./go-redis-migrator -copyData=true -sourceHosts=127.0.0.1:6379,127.0.0.1:6380 -destinationHosts=192.168.0.1:6379`
-or from a single host to a cluster
+
+From a single host to a cluster:
+
 `./go-redis-migrator -copyData=true -sourceHosts=127.0.0.1:6379 -destinationHosts=192.168.0.1:6379,192.168.0.1:6380`
 
 #### Migrating only keys from a list
