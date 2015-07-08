@@ -3,7 +3,9 @@ A cluster aware Redis key migrator.  Moves keys from one cluster or host to anot
 
 ## Setup
 First, install the dependencies: `go install`
+
 Then, make a build: `go build`
+
 Finally, run the binary to see the help: `./go-redis-migrator`
 
 ## Details
