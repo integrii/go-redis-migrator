@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"gopkg.in/redis.v3" // http://godoc.org/gopkg.in/redis.v3
 	"log"
 	"strings"
@@ -84,7 +85,11 @@ func main() {
 		// iterate through each host in the destination cluster, connect, and
 		// run KEYS *
 		var allKeys = getSourceKeys()
-		log.Println(allKeys)
+
+		// loop through all keys
+		for i = 0; len(allKeys); i++ {
+			fmt.Println(allKeys[i])
+		}
 	}
 
 	// Copy all or some keys to the new server/cluster
