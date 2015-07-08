@@ -116,9 +116,11 @@ func main() {
 		// ensure we are connected
 		if sourceClusterConnected != true {
 			log.Fatalln("Please specify a source cluster using -sourceCluster=127.0.0.1:6379.")
+			showHelp()
 		}
 		if destinationClusterConnected != true {
 			log.Fatalln("Please specify a destination cluster using -destinationCluster=127.0.0.1:6379")
+			showHelp()
 		}
 
 		// if the key file path was set, open the file
@@ -146,12 +148,15 @@ func main() {
 
 			var allKeys = getSourceKeys()
 
-			// loop through all keys and print them plainly one per line
-			for i := 0; i < len(allKeys); i++ {
-				var key = allKeys[i]
-				migrateKey(key)
+			if len(allKeys) > 0 {
+				// loop through all keys and print them plainly one per line
+				for i := 0; i < len(allKeys); i++ {
+					var key = allKeys[i]
+					migrateKey(key)
+				}
+			} else {
+				fmt.Println("No keys found in source cluster.")
 			}
-
 		}
 
 	}
