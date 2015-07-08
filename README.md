@@ -2,7 +2,7 @@
 A cluster aware Redis key migrator.  Moves keys from one cluster or host to another cluster or host.
 
 ## Setup
-First, install the dependencies: `go install`
+First, get the dependencies: `go get -v`
 
 Then, make a build: `go build`
 
