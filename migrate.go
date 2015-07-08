@@ -5,11 +5,15 @@ package main
 //
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"gopkg.in/redis.v3" // http://godoc.org/gopkg.in/redis.v3
 	"log"
+	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // redis server connections
@@ -30,6 +34,9 @@ var destinationIsCluster = false
 var sourceClusterConnected = false
 var destinationClusterConnected = false
 
+// counter for number of keys migrated
+var keysMigrated int64 = 0
+
 func main() {
 
 	//
@@ -45,6 +52,11 @@ func main() {
 
 	// parse the args we are looking for
 	flag.Parse()
+
+	// Ensure a valid operation was passed
+	if *getKeys == false && *copyData == false {
+		showHelp()
+	}
 
 	//
 	// Connect to redis servers or clusters
@@ -76,6 +88,7 @@ func main() {
 
 	// Get and display a key list
 	if *getKeys == true {
+
 		// ensure we are connected
 		if sourceClusterConnected != true {
 			log.Fatalln("Please specify a source cluster using -sourceCluster=127.0.0.1:6379.")
@@ -86,9 +99,14 @@ func main() {
 		// run KEYS *
 		var allKeys = getSourceKeys()
 
-		// loop through all keys and print them plainly one per line
-		for i := 0; i < len(allKeys); i++ {
-			fmt.Println(allKeys[i])
+		// see how many keys we fetched
+		if len(allKeys) > 0 {
+			// loop through all keys and print them plainly one per line
+			for i := 0; i < len(allKeys); i++ {
+				fmt.Println(allKeys[i])
+			}
+		} else {
+			fmt.Println("No keys found in source cluster.")
 		}
 	}
 
@@ -103,19 +121,43 @@ func main() {
 			log.Fatalln("Please specify a destination cluster using -destinationCluster=127.0.0.1:6379")
 		}
 
-		// check if a keyfile was specified
-		var keyFile = *keyFilePath
+		// if the key file path was set, open the file
+		if len(*keyFilePath) > 0 {
+			var keyFile, err = os.Open(*keyFilePath)
+			if err != nil {
+				log.Fatalln("Unable to open key file specified.")
+			}
+			// create a new scanner for parsing the io reader returned by the
+			// os.Open call earlier
+			var keyFileScanner = bufio.NewScanner(keyFile)
 
-		// if the key file path was set, open the file and read all the keys
-		// into an array
+			// read the entire key file
+			for keyFileScanner.Scan() {
 
-		// loop through the array of key strings
-		// read key from source cluster
-		// write key to destination cluster
+				// fetch the text for this line
+				var key = keyFileScanner.Text()
 
-		// load the list of keys from the keyfile
-		log.Println("Destination hosts: " + destinationHostsString + keyFile)
+				// migrate the key from source to destination
+				migrateKey(key)
+
+			}
+		} else {
+			// This is what we do if no key file was specified
+
+			var allKeys = getSourceKeys()
+
+			// loop through all keys and print them plainly one per line
+			for i := 0; i < len(allKeys); i++ {
+				var key = allKeys[i]
+				migrateKey(key)
+			}
+
+		}
+
 	}
+
+	// Finish up with some stats
+	fmt.Println("Migrated " + strconv.FormatInt(keysMigrated, 10) + " keys.")
 }
 
 // ping testing functions
@@ -191,4 +233,59 @@ func getSourceKeys() []string {
 	}
 
 	return allKeys.Val()
+}
+
+// Migrates a key from the source cluster to the deestination one
+func migrateKey(key string) {
+
+	//log.Println("migrating key:" + key)
+
+	keysMigrated = keysMigrated + 1
+
+	// init a value to hold the key data
+	var data string
+
+	// init a value to hold the key ttl
+	var ttl time.Duration
+
+	// get the key from the source
+	if sourceIsCluster == true {
+		data = sourceCluster.Get(key).Val()
+		ttl = sourceCluster.PTTL(key).Val()
+
+	} else {
+		data = sourceHost.Get(key).Val()
+		ttl = sourceHost.PTTL(key).Val()
+	}
+
+	// put the key in the destination cluster and set the ttl
+	if destinationIsCluster == true {
+		destinationCluster.Set(key, data, ttl)
+	} else {
+		destinationHost.Set(key, data, ttl)
+	}
+
+	return
+}
+
+// Displays the help content
+func showHelp() {
+	fmt.Println(`
+- Redis Key Migrator - 
+https://github.com/integrii/go-redis-migrator
+
+Migrates all or some of the keys from a Redis host or cluster to a specified host or cluster.  Supports migrating TTLs.
+go-redis-migrator can also be used to list the keys in a cluster.  Run with the -getKey=true and -sourceHosts= flags to do so.
+
+You must run this program with an operation before it will do anything.
+
+Flags:
+  -getKeys=false: Fetches and prints keys from the source host.
+  -copyData=false: Copies all keys in a list specified by -keyFile= to the destination cluster from the source cluster.
+  -keyFile="": The file path which contains the list of keys to migrate.  One per line.
+  -destinationHosts="": A list of source cluster host:port servers seperated by spaces. Use a single host without a ',' if there is no cluster. EX) 127.0.0.1:6379,127.0.0.1:6380
+  -sourceHosts="": A list of source cluster host:port servers seperated by commas. Use a single host without a ',' if there is no cluster. EX) 127.0.0.1:6379,127.0.0.1:6380
+	`)
+
+	os.Exit(0)
 }
