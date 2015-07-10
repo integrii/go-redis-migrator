@@ -49,6 +49,7 @@ func main() {
 	var getKeys = flag.Bool("getKeys", false, "Fetches and prints keys from the source host.")
 	var copyData = flag.Bool("copyData", false, "Copies all keys in a specified list to the destination cluster from the source cluster.")
 	var keyFilePath = flag.String("keyFile", "", "The file path which contains the list of keys to migrate.")
+	var keyFilter = flag.String("keyFilter", "*", "The pattern of keys to migrate if no key file path was specified.")
 
 	// parse the args we are looking for
 	flag.Parse()
@@ -96,8 +97,8 @@ func main() {
 
 		//log.Println("Getting full key list...")
 		// iterate through each host in the destination cluster, connect, and
-		// run KEYS *
-		var allKeys = getSourceKeys()
+		// run KEYS search
+		var allKeys = getSourceKeys(*keyFilter)
 
 		// see how many keys we fetched
 		if len(allKeys) > 0 {
@@ -125,6 +126,12 @@ func main() {
 
 		// if the key file path was set, open the file
 		if len(*keyFilePath) > 0 {
+
+			// ensure that keyFile and keyFilter are not both specified
+			if *keyFilter != "*" {
+				log.Fatalln("Can not use -keyFilter= option with -keyFile= option.")
+			}
+
 			var keyFile, err = os.Open(*keyFilePath)
 			if err != nil {
 				log.Fatalln("Unable to open key file specified.")
@@ -146,7 +153,7 @@ func main() {
 		} else {
 			// This is what we do if no key file was specified
 
-			var allKeys = getSourceKeys()
+			var allKeys = getSourceKeys(*keyFilter)
 
 			if len(allKeys) > 0 {
 				// loop through all keys and print them plainly one per line
@@ -228,13 +235,13 @@ func connectDestinationCluster() {
 }
 
 // Gets all the keys from the source server/cluster
-func getSourceKeys() []string {
+func getSourceKeys(keyFilter string) []string {
 
 	var allKeys *redis.StringSliceCmd
 	if sourceIsCluster == true {
-		allKeys = sourceCluster.Keys("*")
+		allKeys = sourceCluster.Keys(keyFilter)
 	} else {
-		allKeys = sourceHost.Keys("*")
+		allKeys = sourceHost.Keys(keyFilter)
 	}
 
 	return allKeys.Val()
@@ -288,6 +295,7 @@ Flags:
   -getKeys=false: Fetches and prints keys from the source host.
   -copyData=false: Copies all keys in a list specified by -keyFile= to the destination cluster from the source cluster.
   -keyFile="": The file path which contains the list of keys to migrate.  One per line.
+  -keyFilter="*": The filter for which keys to migrate.  Does not work when -keyFile is also specified.
   -destinationHosts="": A list of source cluster host:port servers seperated by spaces. Use a single host without a ',' if there is no cluster. EX) 127.0.0.1:6379,127.0.0.1:6380
   -sourceHosts="": A list of source cluster host:port servers seperated by commas. Use a single host without a ',' if there is no cluster. EX) 127.0.0.1:6379,127.0.0.1:6380
 	`)
