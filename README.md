@@ -1,6 +1,11 @@
 # go-redis-migrator
 A cluster aware Redis key migrator.  Moves keys from one cluster or host to another cluster or host.
 
+
+## Details
+This program connects to a source host or cluster and migrates keys to a destination host or cluster.  It is possible to fetch a list of keys with this program, create a file with the keys to migrate, and feed that list into this program for selective migration.  This is useful if you have some keys hanging around that you do not want to migrate.
+
+
 ## Setup
 First, get the dependencies: `go get -v`
 
@@ -8,14 +13,14 @@ Then, make a build: `go build`
 
 Finally, run the binary to see the help: `./go-redis-migrator`
 
-## A quick example
+## Example
 
 ```
 ./go-redis-migrator -copyData -sourceHosts=172.31.37.164:6379,172.31.37.162:6379,172.31.37.168:6379,172.31.37.170:6379,172.31.37.169:6379 -destinationHosts=172.31.34.231:6379,172.31.34.228:6379,172.31.34.227:6379,172.31.34.230:6379,172.31.34.229:6379,172.31.34.226:6379 -keyFile=keyList.txt 
 Migrated 57 keys.
 ```
 
-## A speed test
+## Speed Test
 
 ```
 time ./go-redis-migrator -sourceHosts=127.0.0.1:6379 -destinationHosts=127.0.0.1:6380 -copyData
@@ -27,8 +32,8 @@ sys		0m1.475s
 ```
 **6,367 keys/sec!**
 
-## Details
-This program connects to a source host or cluster and migrates keys to a destination host or cluster.  It is possible to fetch a list of keys with this program, create a file with the keys to migrate, and feed that list into this program for selective migration.  This is useful if you have some keys hanging around that you do not want to migrate.
+
+## More Examples
 
 #### Getting a key list from the source
 `./go-redis-migrator -getKeys=true -sourceHosts=127.0.0.1:6379`
@@ -52,11 +57,11 @@ From a single host to a cluster:
 
 `./go-redis-migrator -copyData=true -sourceHosts=127.0.0.1:6379 -destinationHosts=192.168.0.1:6379,192.168.0.1:6380`
 
-#### Migrating only keys from a list
+## Migrating only keys from a list
 `./go-redis-migrator -copydata=true -sourceHosts=127.0.0.1:6379 -destinationHosts=192.168.0.1:6379 -keyFile=./onlyMoveTheseKeys.txt`
 
 
-#### CLI help
+## CLI help
 Simply run the binary to get the following help:
 ```
 - Redis Key Migrator - 
