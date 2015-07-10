@@ -19,6 +19,19 @@ user	0m0.011s
 sys		0m0.031s
 ```
 
+## A speed test
+
+```
+time ./go-redis-migrator -sourceHosts=127.0.0.1:6379 -destinationHosts=127.0.0.1:6380 -copyData
+Migrated 22000 keys.
+
+real	0m3.455s
+user	0m0.812s
+sys		0m1.475s
+
+*6,367 keys/sec*
+```
+
 ## Details
 This program connects to a source host or cluster and migrates keys to a destination host or cluster.  It is possible to fetch a list of keys with this program, create a file with the keys to migrate, and feed that list into this program for selective migration.  This is useful if you have some keys hanging around that you do not want to migrate.
 
