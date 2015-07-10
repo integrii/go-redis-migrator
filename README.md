@@ -8,7 +8,7 @@ Then, make a build: `go build`
 
 Finally, run the binary to see the help: `./go-redis-migrator`
 
-## A quick example (pun intended)
+## A quick example
 
 ```
 ./go-redis-migrator -copyData -sourceHosts=172.31.37.164:6379,172.31.37.162:6379,172.31.37.168:6379,172.31.37.170:6379,172.31.37.169:6379 -destinationHosts=172.31.34.231:6379,172.31.34.228:6379,172.31.34.227:6379,172.31.34.230:6379,172.31.34.229:6379,172.31.34.226:6379 -keyFile=keyList.txt 
