@@ -262,19 +262,22 @@ func migrateKey(key string) {
 
 	// get the key from the source
 	if sourceIsCluster == true {
-		data = sourceCluster.Get(key).Val()
+		data = sourceCluster.Dump(key).Val()
 		ttl = sourceCluster.PTTL(key).Val()
 
 	} else {
-		data = sourceHost.Get(key).Val()
+		data = sourceHost.Dump(key).Val()
 		ttl = sourceHost.PTTL(key).Val()
 	}
 
+	// convert ttl to int64 sesconds
+	var ttlSeconds = int64(ttl.Seconds())
+
 	// put the key in the destination cluster and set the ttl
 	if destinationIsCluster == true {
-		destinationCluster.Set(key, data, ttl)
+		destinationCluster.Restore(key, ttlSeconds, data)
 	} else {
-		destinationHost.Set(key, data, ttl)
+		destinationHost.Restore(key, ttlSeconds, data)
 	}
 
 	return
