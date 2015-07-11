@@ -1,7 +1,6 @@
-# go-redis-migrator
+![](https://raw.githubusercontent.com/integrii/go-redis-migrator/master/logo.png)
 A cluster aware Redis key migrator.  Moves keys from one cluster or host to another cluster or host.
 
-![](https://raw.githubusercontent.com/integrii/go-redis-migrator/master/logo.png)
 
 ## Details
 It is possible to use the -keyFilter flag to match a subset of keys you wish to migrate. It is also possible to fetch a list of all keys with this program, create a file with a subset of keys to migrate, and then feed that list back into this program for selective migration.  This is useful if you have some keys hanging around that you do not want to migrate and want to prune during the migration.
