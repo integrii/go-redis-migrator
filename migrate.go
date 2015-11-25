@@ -270,11 +270,14 @@ func migrateKey(key string) {
 		ttl = sourceHost.PTTL(key).Val()
 	}
 
+	// convert ttl to int64 seconds
+	var ttlSeconds = int64(ttl.Seconds())
+
 	// put the key in the destination cluster and set the ttl
 	if destinationIsCluster == true {
-		destinationCluster.Restore(key, ttl, data)
+		destinationCluster.Restore(key, ttlSeconds, data)
 	} else {
-		destinationHost.Restore(key, ttl, data)
+		destinationHost.Restore(key, ttlSeconds, data)
 	}
 
 	return
