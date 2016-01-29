@@ -9,11 +9,12 @@ It is possible to use the -keyFilter flag to match a subset of keys you wish to 
 go-redis-migrator is especially useful for populating test data in development instances, executing production migrations, or moving from a non-clustered to a clustered deployment.
 
 ## Setup
-First, get the dependencies: `go get -v`
 
-Then, make a build: `go build`
-
-Finally, run the binary to see the help: `./go-redis-migrator`
+ - Make sure you have golang installed on your operating system.
+ - Make sure you have your `$GOPATH` environment variable setup properly.
+ - Download it: `go get github.com/integrii/go-redis-migrator`
+ - Build and install it: `go install github.com/integrii/go-redis-migrator`
+ - Finally, run the binary to see the help: `$GOPATH/bin/go-redis-migrator`
 
 ## Example
 
