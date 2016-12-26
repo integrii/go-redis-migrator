@@ -8,12 +8,13 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"gopkg.in/redis.v3" // http://godoc.org/gopkg.in/redis.v3
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"gopkg.in/redis.v3" // http://godoc.org/gopkg.in/redis.v3
 )
 
 // redis server connections
@@ -35,7 +36,7 @@ var sourceClusterConnected = false
 var destinationClusterConnected = false
 
 // counter for number of keys migrated
-var keysMigrated int64 = 0
+var keysMigrated int64
 
 func main() {
 
@@ -270,14 +271,11 @@ func migrateKey(key string) {
 		ttl = sourceHost.PTTL(key).Val()
 	}
 
-	// convert ttl to int64 seconds
-	var ttlSeconds = int64(ttl.Seconds())
-
 	// put the key in the destination cluster and set the ttl
 	if destinationIsCluster == true {
-		destinationCluster.Restore(key, ttlSeconds, data)
+		destinationCluster.Restore(key, ttl, data)
 	} else {
-		destinationHost.Restore(key, ttlSeconds, data)
+		destinationHost.Restore(key, ttl, data)
 	}
 
 	return
@@ -286,7 +284,7 @@ func migrateKey(key string) {
 // Displays the help content
 func showHelp() {
 	fmt.Println(`
-- Redis Key Migrator - 
+- Redis Key Migrator -
 https://github.com/integrii/go-redis-migrator
 
 Migrates all or some of the keys from a Redis host or cluster to a specified host or cluster.  Supports migrating TTLs.
