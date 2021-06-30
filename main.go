@@ -271,6 +271,11 @@ func migrateKey(key string) {
 		ttl = sourceHost.PTTL(key).Val()
 	}
 
+	// set ttl to 0 due to restore requiring >= 0 for ttl
+	if ttl == -1 {
+		ttl = 0
+	}
+
 	// put the key in the destination cluster and set the ttl
 	if destinationIsCluster == true {
 		destinationCluster.Restore(key, ttl, data)
