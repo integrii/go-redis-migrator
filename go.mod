@@ -1,4 +1,4 @@
-module go-redis-migrator
+module github.com/integrii/go-redis-migrator
 
 go 1.16
 
